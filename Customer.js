@@ -79,3 +79,54 @@ function buyItem() {
 		});
 	});
 }
+function moreShopping() {
+	inquirer
+		.prompt([
+		{
+			name: "again",
+			type: "confirm",
+			message: "Would you like to continue shopping?\n"
+		}
+	])
+	.then(function(answer) {
+		if(answer.again) {
+			readProducts();
+		}
+		else {
+			console.log("Please come again soon!\n");
+			connection.end();
+		}
+	});	
+}
+
+
+function readProducts() {
+	connection.query("SELECT * FROM products WHERE stock_quantity > 0", function(err, res) {
+		if (err) throw err;
+		// Log all results of the SELECT statement
+		console.log("+----+------------------------------------------+------------------+----------+");
+		console.log("|  # | NAME                                     | DEPARTMENT       | PRICE    |");
+		console.log("+----+------------------------------------------+------------------+----------+");
+		for (let i = 0; i < res.length; i++) {
+			let item_id = res[i].item_id.toString();
+			let product_name = res[i].product_name;
+			let department_name = res[i].department_name;
+			let price = "$" + res[i].price;
+			while(item_id.length < 2) {
+				item_id = " " + item_id;
+			}
+			while(product_name.length < 40) {
+				product_name = product_name + " ";
+			}
+			while(department_name.length < 16) {
+				department_name = department_name + " ";
+			}
+			while(price.length < 8) {
+				price = " " + price;
+			}
+			console.log("| " + item_id + " | " + product_name + " | " + department_name + " | " + price + " |");
+		}
+		console.log("+----+------------------------------------------+------------------+----------+\n");
+	});
+	buyItem();
+}
