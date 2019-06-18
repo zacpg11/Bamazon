@@ -47,3 +47,35 @@ function buyItem() {
 					chosenItem = results[i];
 				}
 			}
+
+            // determine if quantity is high enough
+			if (chosenItem.stock_quantity >= parseInt(answer.quantity)) {
+				// There is enough; reduce the stock in the database and provide the customer's total
+				var newQuantity = parseInt(chosenItem.stock_quantity) - parseInt(answer.quantity);
+				var totalPrice = parseFloat(chosenItem.price) * answer.quantity;
+				connection.query(
+					"UPDATE products SET ? WHERE ?",
+					[
+						{
+							stock_quantity: newQuantity,
+							product_sales: (parseFloat(chosenItem.product_sales) + parseFloat(totalPrice)).toFixed(2)
+						},
+						{
+							item_id: chosenItem.item_id
+						}
+					],
+					function(error) {
+						if (error) throw error;
+						console.log("Thanks for shopping! Your total is $" + totalPrice + ".\n");
+						moreShopping();
+					}
+				);
+			}
+			else {
+				// stock_quantity wasn't high enough, so apologize and start over
+				console.log("I'm sorry, we only have " + chosenItem.stock_quantity + " of those.\n");
+				moreShopping();
+			}
+		});
+	});
+}
